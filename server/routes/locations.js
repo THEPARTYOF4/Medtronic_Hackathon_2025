@@ -4,7 +4,7 @@ const { validateBody } = require('../middleware/validate');
 const locationSchema = require('../schemas/location.request.json');
 const { spawn } = require('child_process');
 const path = require('path');
-const { MAPS_API_KEY } = require('../API_KEY');
+const { API_KEY } = require('../API_KEY');
 
 // POST /api/locations/search
 // Handles location search requests for Google Maps integration
@@ -74,7 +74,7 @@ router.get('/embed/:id', (req, res) => {
 
   // Construct the Google Maps Embed API URL
   const baseUrl = 'https://www.google.com/maps/embed/v1/search';
-  const key = MAPS_API_KEY;
+  const key = API_KEY;
   
   // Build query parameters
   const params = new URLSearchParams({

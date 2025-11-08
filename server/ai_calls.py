@@ -1,11 +1,11 @@
 from google import genai
-from API_KEY import GEMINI_API_KEY, MAPS_API_KEY
+from API_KEY import API_KEY
 from io import StringIO
 import csv
 import time
 import json
 import sys
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=API_KEY)
 glossary = dict()                                                                                   
 
 def readArticle(link):
