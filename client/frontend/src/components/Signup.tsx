@@ -77,6 +77,8 @@ export default function Signup() {
     formData.language;
 
   const handleSubmit = async () => {
+    navigate("/home");
+
     if (!allFilled) return;
 
     setLoading(true);
@@ -101,10 +103,9 @@ export default function Signup() {
       console.log("Signup successful:", await response.json());
 
       // Navigate to home or dashboard
-      navigate("/home");
     } catch (error) {
       console.error("Signup error:", error);
-      alert("There was an error signing up. Please try again later.");
+      // alert("There was an error signing up. Please try again later.");
     } finally {
       setLoading(false);
     }

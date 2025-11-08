@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -10,16 +11,18 @@ export default function LoginPage() {
     birthdate: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    navigate("/home");
     e.preventDefault();
 
     if (!formData.name || !formData.password || !formData.birthdate) {
-      alert("Please fill in all fields before signing in.");
+      // alert("Please fill in all fields before signing in.");
       return;
     }
 
