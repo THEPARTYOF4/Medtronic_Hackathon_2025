@@ -81,12 +81,16 @@ def handle_chat_request(request):
         if file_data:
             file_content = file_data.get("content", "")
             file_context = f"\nFile '{file_data['name']}' content: {file_content}" if file_content else ""
-
-        # Generate response using Gemini
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt + file_context
-        )
+        
+        try:
+            # Generate response using Gemini
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt + file_context + "\nProvide a concise and accurate answer relevant to medical topics."
+            )
+        except Exception as api_error:
+            print(f"Gemini API Error: {str(api_error)}", file=sys.stderr)
+            raise Exception(f"Gemini API error: {str(api_error)}")
 
         # Get approximate token count (rough estimate based on words)
         response_text = response.text
@@ -280,33 +284,97 @@ def handle_location_request(request):
     except Exception as e:
         raise Exception(f"Error processing location request: {str(e)}")
 
-if __name__ == "__main__":
-    try:
-        # Read request data from stdin
-        request_data = sys.stdin.read()
-        request = json.loads(request_data)
-        
-        # Check mode from command line args
-        mode = "chat"  # default mode
-        if len(sys.argv) > 2 and sys.argv[1] == "--mode":
-            mode = sys.argv[2]
-        
-        # Process the request based on mode
-        if mode == "articles":
-            response = handle_article_request(request)
-        elif mode == "locations":
-            response = handle_location_request(request)
-        else:
-            response = handle_chat_request(request)
-        
-        # Send response back to Node.js
-        print(json.dumps(response))
-        
-    except Exception as e:
-        # Send error back to Node.js
-        error_response = {
-            "error": "Python processing error",
-            "details": str(e)
+def run_chatbot_tests():
+    """Run a series of tests to demonstrate chatbot functionality"""
+    print("\n=== Medical Chatbot Test Suite ===\n")
+
+    # Test 1: Basic chat functionality
+    print("Test 1: Basic Medical Question")
+    chat_request = {
+        "prompt": "What are the common symptoms of type 2 diabetes?",
+        "metadata": {
+            "type": "medical",
+            "searchGlossary": True,
+            "updateGlossary": True
         }
-        print(json.dumps(error_response))
-        sys.exit(1)
+    }
+    try:
+        response = handle_chat_request(chat_request)
+        print("Chat Response:", response["reply"]["text"])
+        print("Medical Terms Found:", len(response["glossaryTerms"]))
+        print("\nGlossary Terms:")
+        for term in response["glossaryTerms"]:
+            print(f"- {term['term']}: {term['definition']}")
+    except Exception as e:
+        print("Error in chat test:", str(e))
+
+    # Test 2: Article recommendations
+    print("\nTest 2: Article Recommendations")
+    article_request = {
+        "topic": "managing diabetes diet",
+        "metadata": {
+            "maxResults": 3,
+            "includeDefinitions": True,
+            "sourcePriority": ["medical", "academic", "news"]
+        }
+    }
+    try:
+        response = handle_article_request(article_request)
+        print(f"\nFound {len(response['articles'])} articles about {response['topic']}:")
+        for article in response['articles']:
+            print(f"\n- {article['name']}")
+            print(f"  URL: {article['url']}")
+            print(f"  Type: {article['sourceType']}")
+            print(f"  Description: {article['description'][:100]}...")
+    except Exception as e:
+        print("Error in article test:", str(e))
+
+    # Test 3: Location search
+    print("\nTest 3: Medical Location Search")
+    location_request = {
+        "query": "endocrinologists near Charlotte NC",
+        "metadata": {
+            "region": "US",
+            "language": "en",
+            "zoom": 12
+        }
+    }
+    try:
+        response = handle_location_request(location_request)
+        print("\nLocation Search Results:")
+        print("Original Query:", response["query"]["original"])
+        print("Enhanced Query:", response["query"]["enhanced"])
+        print("Search ID:", response["id"])
+        print("\nTo view the map, use these parameters:")
+        for key, value in response["searchParams"].items():
+            print(f"- {key}: {value}")
+    except Exception as e:
+        print("Error in location test:", str(e))
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--mode":
+        try:
+            # Handle API requests from Node.js server
+            request_data = sys.stdin.read()
+            request = json.loads(request_data)
+            
+            mode = sys.argv[2] if len(sys.argv) > 2 else "chat"
+            
+            if mode == "articles":
+                response = handle_article_request(request)
+            elif mode == "locations":
+                response = handle_location_request(request)
+            else:
+                response = handle_chat_request(request)
+            
+            print(json.dumps(response))
+            
+        except Exception as e:
+            print(json.dumps({
+                "error": "Python processing error",
+                "details": str(e)
+            }))
+            sys.exit(1)
+    else:
+        # Run test suite when script is run directly
+        run_chatbot_tests()
