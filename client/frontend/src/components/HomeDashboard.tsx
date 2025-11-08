@@ -14,17 +14,44 @@ import DeviceStatusCard from './health/DeviceStatusCard';
 export function HomeDashboard() {
   const [inputLoading, setInputLoading] = useState(false);
   const [isEli5, setIsEli5] = useState(false);
+  const [aiResponse, setAiResponse] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleInputSubmit = async (message: string, file?: File) => {
     setInputLoading(true);
+    setAiResponse(null); // reset previous response
 
-    // Navigate to AI tab and send message to AiChat via events
-    window.dispatchEvent(new CustomEvent('ai-navigate'));
-    window.dispatchEvent(new CustomEvent('ai-message', { detail: { message, file, isEli5 } }));
+    try {
+      // --- Build form data ---
+      const formData = new FormData();
+      formData.append("message", message);
+      formData.append("isEli5", String(isEli5));
+      if (file) formData.append("file", file);
 
-    await new Promise((r) => setTimeout(r, 400));
-    setInputLoading(false);
+      // --- POST request to backend ---
+      const response = await fetch("/API_ROUTE_PLACEHOLDER", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Failed to send to backend");
+      const data = await response.json();
+
+      // --- Store AI response locally ---
+      setAiResponse(data.response || "The AI assistant responded successfully!");
+
+      // --- Optionally dispatch message globally ---
+      window.dispatchEvent(
+        new CustomEvent("ai-message", {
+          detail: { message, file, isEli5, backendResponse: data },
+        })
+      );
+    } catch (err) {
+      console.error("Error sending message:", err);
+      alert("Something went wrong while sending your question.");
+    } finally {
+      setInputLoading(false);
+    }
   };
 
   const handleFilePicked = (e: ChangeEvent<HTMLInputElement>) => {
@@ -35,79 +62,141 @@ export function HomeDashboard() {
     }
   };
 
+  const handleContinueConversation = () => {
+    window.dispatchEvent(new CustomEvent("ai-navigate"));
+  };
+
   return (
   <div className="flex flex-col p-8 max-w-7xl mx-auto">
       {/* AI Medical Assistant Hero Card (with inline AiInput) */}
-    <div className="flex justify-center mb-16">
-          <div className="w-full max-w-4xl min-h-[420px] p-2 md:p-6 lg:p-8 flex flex-col gap-10">
-            <CardHeader>
-              <CardTitle className="text-6xl">Ask anything about your health — get clear, reliable answers.</CardTitle>
-              <p className="text-md text-muted-foreground mt-2">Get concise, trustworthy medical explanations — attach lab results or ask general health questions.</p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+      <div className="flex justify-center mb-16">
+        <div className="w-full max-w-4xl min-h-[420px] p-2 md:p-6 lg:p-8 flex flex-col gap-10">
+          <CardHeader>
+            <CardTitle className="text-6xl">
+              Ask anything about your health — get clear, reliable answers.
+            </CardTitle>
+            <p className="text-md text-muted-foreground mt-2">
+              Get concise, trustworthy medical explanations — attach lab results
+              or ask general health questions.
+            </p>
+          </CardHeader>
+
+          <CardContent>
+            <div className="space-y-4">
+              <AiInput
+                onSubmit={handleInputSubmit}
+                isLoading={inputLoading}
+                variant="inline"
+              />
+
+              <div className="flex items-center justify-between mt-2 w-full">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isEli5}
+                    onChange={(e) => setIsEli5(e.target.checked)}
+                    className="h-5 w-5"
+                  />
+                  <span className="text-base">
+                    Explain it to me in simpler terms
+                  </span>
+                </label>
+
                 <div>
-                  <AiInput onSubmit={handleInputSubmit} isLoading={inputLoading} variant="inline" />
-                </div>
-
-                <div className="flex items-center justify-between mt-2 w-full">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={isEli5} onChange={(e) => setIsEli5(e.target.checked)} className="h-5 w-5" />
-                    <span className="text-base">Explain it to me in simpler terms</span>
-                  </label>
-                  <div>
-                    <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePicked} accept=".pdf,.doc,.docx,.png,.jpg" />
-                    <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white font-semibold shadow hover:bg-primary/90 transition">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14" />
-                      </svg>
-                      Upload medical documents
-                    </button>
-                  </div>
-                </div>
-
-                {/* Example */}
-                <div className="flex justify-center items-center">
-                  <div className="text-md text-muted-foreground mt-5">Try: “Explain my cholesterol test results in plain English.”</div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleFilePicked}
+                    accept=".pdf,.doc,.docx,.png,.jpg"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white font-semibold shadow hover:bg-primary/90 transition"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14" />
+                    </svg>
+                    Upload medical documents
+                  </button>
                 </div>
               </div>
-            </CardContent>
-          </div>
-        </div>
 
-    <div className="text-5xl font-semibold mt-10 mb-6">Personalize Health Insights</div>
-
-        {/* Your Health Insights: three cards in one row, AI summary full-width below */}
-    <div className="grid grid-cols-12 gap-6 mb-16">
-          <div className="col-span-12 grid grid-cols-12 gap-6" style={{ minHeight: '340px' }}>
-            <div className="col-span-4 h-full">
-              <VitalsSummaryCard weight={143} weightChange={1.5} heartRate={72} bp="118 / 78" deviceStatus="Stable" />
-            </div>
-            <div className="col-span-4 h-full">
-              <TrendsOverview heartRate={[70,72,71,74,73]} weight={[142,143,144,144,145]} fluid={[0.3,0.4,0.5,0.4,0.6]} />
-            </div>
-            <div className="col-span-4 h-full">
-              <DeviceStatusCard deviceName="Medtronic CRT-D" battery={78} implantDate="Mar 2023" connection="Active" lastSync="3 hrs ago" />
-            </div>
-          </div>
-
-          <div className="col-span-12">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">AI Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">Quick AI interpretation</div>
-                <div className="mt-3 p-4 bg-gray-100 rounded">“Your weight increased slightly today — this can be normal, but monitor for swelling or shortness of breath.”</div>
-                <div className="mt-4 flex justify-center">
-                  <button className="px-4 py-2 rounded-md bg-primary text-white mx-2">Explain My Numbers</button>
-                  <button className="px-4 py-2 rounded-md border mx-2">Message My Care Team</button>
+              <div className="flex justify-center items-center">
+                <div className="text-md text-muted-foreground mt-5">
+                  Try: “Explain my cholesterol test results in plain English.”
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* --- Display AI Response --- */}
+              {aiResponse && (
+                <Card className="mt-10 bg-gray-50 shadow-sm border border-gray-200">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-gray-800">
+                      AI Assistant’s Response
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
+                      {aiResponse}
+                    </p>
+                    <div className="flex justify-center mt-6">
+                      <button
+                        onClick={handleContinueConversation}
+                        className="px-6 py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary/90 transition"
+                      >
+                        Continue Conversation →
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </CardContent>
+        </div>
+      </div>
+
+      {/* --- Health Insights Section --- */}
+      <div className="text-5xl font-semibold mt-10 mb-6">
+        Personalize Health Insights
+      </div>
+
+      <div className="grid grid-cols-12 gap-6 mb-16">
+        <div className="col-span-12 grid grid-cols-12 gap-6" style={{ minHeight: '340px' }}>
+          <div className="col-span-4 h-full">
+            <VitalsSummaryCard
+              weight={143}
+              weightChange={1.5}
+              heartRate={72}
+              bp="118 / 78"
+              deviceStatus="Stable"
+            />
+          </div>
+          <div className="col-span-4 h-full">
+            <TrendsOverview
+              heartRate={[70, 72, 71, 74, 73]}
+              weight={[142, 143, 144, 144, 145]}
+              fluid={[0.3, 0.4, 0.5, 0.4, 0.6]}
+            />
+          </div>
+          <div className="col-span-4 h-full">
+            <DeviceStatusCard
+              deviceName="Medtronic CRT-D"
+              battery={78}
+              implantDate="Mar 2023"
+              connection="Active"
+              lastSync="3 hrs ago"
+            />
           </div>
         </div>
+      </div>
 
         {/* Upcoming Reminders Section */}
     <div className="mt-10 mb-16">
