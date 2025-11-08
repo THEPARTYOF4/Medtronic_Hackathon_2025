@@ -9,24 +9,46 @@ export default function LoginPage() {
     password: "",
     birthdate: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Temporary validation (we’ll replace this with real verification)
     if (!formData.name || !formData.password || !formData.birthdate) {
       alert("Please fill in all fields before signing in.");
       return;
     }
 
-    console.log("Login submitted:", formData);
-    // future: handle login verification here
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid login credentials.");
+      }
+
+      const data = await response.json();
+      console.log("Login successful:", data);
+
+      // For now, redirect or show success alert
+      alert("Login successful!");
+      // Example: navigate("/dashboard");
+
+    } catch (error) {
+      console.error(error);
+      alert("Login failed. Please check your credentials.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -44,10 +66,7 @@ export default function LoginPage() {
             Sign in to continue your health journey.
           </p>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6 mt-8 text-lg"
-          >
+          <form onSubmit={handleSubmit} className="space-y-6 mt-8 text-lg">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-lg font-semibold">
                 Name
@@ -63,10 +82,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="password"
-                className="text-lg font-semibold"
-              >
+              <Label htmlFor="password" className="text-lg font-semibold">
                 Password
               </Label>
               <Input
@@ -81,10 +97,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="birthdate"
-                className="text-lg font-semibold"
-              >
+              <Label htmlFor="birthdate" className="text-lg font-semibold">
                 Birthdate
               </Label>
               <Input
@@ -99,9 +112,10 @@ export default function LoginPage() {
 
             <Button
               type="submit"
+              disabled={isSubmitting}
               className="w-full py-6 text-lg font-semibold mt-6"
             >
-              Sign In
+              {isSubmitting ? "Signing In..." : "Sign In"}
             </Button>
           </form>
 
