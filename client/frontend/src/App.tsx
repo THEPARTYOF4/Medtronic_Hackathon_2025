@@ -1,17 +1,11 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Button } from "@/components/ui/button"
 
 function App() {
 
   return (
-    <>
-      <div className="bg-red-500 text-white p-4 font-bold rounded-lg">
-        If this text is white with a red background, rounded corners, and bold font,
-        Tailwind CSS is working!
-      </div>
-    </>
+    <div className="flex min-h-svh flex-col items-center justify-center">
+      <Button>Click me!</Button>
+    </div>
   )
 }
 
