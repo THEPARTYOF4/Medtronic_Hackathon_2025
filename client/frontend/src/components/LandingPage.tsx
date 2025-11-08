@@ -15,7 +15,7 @@ export function LandingPage() {
       >
         {/* Website Title */}
         <h1 className="text-9xl font-bold tracking-tight text-white">
-          MedAssist
+          Medphonics
         </h1>
 
         {/* Slogan */}

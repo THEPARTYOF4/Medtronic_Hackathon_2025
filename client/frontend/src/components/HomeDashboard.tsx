@@ -10,6 +10,7 @@ import { DoctorsMap } from "./DoctorsMap";
 import VitalsSummaryCard from './health/VitalsSummaryCard';
 import TrendsOverview from './health/TrendsOverview';
 import DeviceStatusCard from './health/DeviceStatusCard';
+import { ScrollArea } from "./ui/scroll-area";
 // (removed Word of the Day) hardcoded placeholder removed
 export function HomeDashboard() {
   const [inputLoading, setInputLoading] = useState(false);
@@ -65,6 +66,85 @@ export function HomeDashboard() {
   const handleContinueConversation = () => {
     window.dispatchEvent(new CustomEvent("ai-navigate"));
   };
+
+  const articlesData = [
+    {
+      link: "https://www.thedailynewsonline.com/news/states-jostle-over-50b-rural-health-fund-as-medicaid-cuts-t...",
+      title:
+        "States jostle over $50B rural health fund as Medicaid cuts trigger scramble",
+      description:
+        "WASHINGTON — Nationwide, states are racing to win their share of a new $50 billion rural health fund...",
+      image_url:
+        "https://bloximages.newyork1.vip.townnews.com/thedailynewsonline.com/content/tncms/assets/v3/editori...",
+      keywords: [
+        "health economics",
+        "medicaid",
+        "health care",
+        "social programs",
+        "health",
+        "hospital",
+        "medicare (united states)",
+        "centers for medicare & medicaid services",
+        "politics",
+        "make america healthy again",
+        "artificial intelligence",
+      ],
+      creator: ["Sarah Jane TribblE KFF Health News (TNS)"],
+      source_name: "The Daily News Online",
+    },
+    {
+      link: "https://www.getsurrey.co.uk/news/health/bbc-doctors-surprising-vitamin-packed-32816782",
+      title:
+        "BBC doctors' 'surprising' vitamin-packed superfood you can now buy in supermarkets",
+      description:
+        "You might be surprised to find them at your local supermarket.",
+      image_url:
+        "https://i2-prod.birminghammail.co.uk/incoming/article32816868.ece/ALTERNATES/s615/0_GettyImages-691...",
+      keywords: ["health"],
+      creator: ["Howard Lloyd"],
+      source_name: "Surrey Live",
+    },
+    {
+      link: "https://www.getsurrey.co.uk/news/nhs-alert-call-999-you-32815428",
+      title:
+        "NHS alert to 'call 999' if you spot this symptom as 'deadly' disease spreads in UK",
+      description: "This infection typically kills around one in 10 people who get it.",
+      image_url:
+        "https://i2-prod.getsurrey.co.uk/incoming/article32815341.ece/ALTERNATES/s615/0_GettyImages-22001253...",
+      keywords: ["news"],
+      creator: ["Fiona Callingham"],
+      source_name: "Surrey Live",
+    },
+    {
+      link: "https://www.havasunews.com/news/gallego-joins-push-to-overhaul-veteran-transition-programs-and-cut-...",
+      title:
+        "Gallego joins push to overhaul veteran transition programs and cut suicide rates",
+      description:
+        "Sen. Ruben Gallego is backing a new bipartisan bill aimed at reducing veteran suicide by strengthening transition programs.",
+      image_url:
+        "https://bloximages.chicago2.vip.townnews.com/havasunews.com/content/tncms/assets/v3/editorial/1/9c/...",
+      keywords: [
+        "veterans health administration",
+        "united states department of veterans affairs",
+        "health",
+        "veteran",
+        "military",
+      ],
+      creator: ["Today's News-Herald"],
+      source_name: "Havasu News",
+    },
+    {
+      link: "https://www.timesargus.com/features/weekend_magazine/health-talk-consider-lung-cancer-screening/art...",
+      title: "Health Talk: Consider lung cancer screening",
+      description:
+        "Radiology and early detection for lung cancer screening are a partnership for success.",
+      image_url:
+        "https://bloximages.chicago2.vip.townnews.com/timesargus.com/content/tncms/custom/image/b304aa08-5df...",
+      keywords: ["weekend_magazine", "health"],
+      creator: ["Ashley Kiernan"],
+      source_name: "Times Argus",
+    },
+  ];
 
   return (
   <div className="flex flex-col p-8 max-w-7xl mx-auto">
@@ -255,55 +335,24 @@ export function HomeDashboard() {
         {/* Articles and References Section */}
     <div className="mt-10 mb-16">
           <h2 className="text-5xl font-semibold mt-10 mb-6">Notable Articles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ArticleCard
-              image="https://www.geo.tv/assets/uploads/updates/2025-11-07/632573_4046145_updates.jpg"
-              title="Emily Simpson says son Luke's condition is ‘very complicated' after PANDAS diagnosis"
-              summary="Emily Simpson gets honest about son Luke’s health after PANDAS diseaseEmily Simpson recently reveal..."
-              tags={["entertainment", "pakistan"]}
-              source="Geo News Digital Desk"
-              url="https://www.geo.tv/latest/632573-emily-simpson-gets-honest-about-son-lukes-health-after-pandas-dise..."
-            />
-            <ArticleCard
-              image="https://www.medicalnewstoday.com/content/images/articles/318/318868/a-woman-having-her-heart-rate-monitored.jpg"
-              title="Heart Disease: Facts, Statistics, and You"
-              summary="Learn about the latest statistics and facts on heart disease, including risk factors and prevention tips."
-              tags={["health", "cardiology"]}
-              source="Medical News Today"
-              url="https://www.medicalnewstoday.com/articles/heart-disease-facts"
-            />
-            <ArticleCard
-              image="https://www.cdc.gov/diabetes/images/library/features/diabetes-basics-600px.jpg"
-              title="Diabetes Basics"
-              summary="Understand the basics of diabetes, including symptoms, management, and prevention strategies."
-              tags={["health", "diabetes"]}
-              source="CDC"
-              url="https://www.cdc.gov/diabetes/basics/index.html"
-            />
-            <ArticleCard
-              image="https://www.kidney.org/sites/default/files/styles/large/public/atoz/images/kidney-disease.jpg"
-              title="Kidney Disease: What You Need to Know"
-              summary="Explore the causes, symptoms, and treatments for kidney disease, plus tips for maintaining kidney health."
-              tags={["health", "nephrology"]}
-              source="National Kidney Foundation"
-              url="https://www.kidney.org/atoz/content/kidneydisease"
-            />
-            <ArticleCard
-              image="https://www.cancer.org/content/dam/cancer-org/images/logos/acs-logo-og-image.jpg"
-              title="Cancer Basics"
-              summary="Get an overview of cancer, including types, risk factors, and common treatments."
-              tags={["health", "oncology"]}
-              source="American Cancer Society"
-              url="https://www.cancer.org/cancer/cancer-basics.html"
-            />
-            <ArticleCard
-              image="https://www.mayoclinic.org/-/media/kcms/gbs/patient-consumer/images/2018/10/11/13/36/influenza-8col.jpg"
-              title="Flu: Symptoms and Causes"
-              summary="Learn about the symptoms, causes, and prevention of influenza (flu)."
-              tags={["health", "infectious disease"]}
-              source="Mayo Clinic"
-              url="https://www.mayoclinic.org/diseases-conditions/flu/symptoms-causes/syc-20351719"
-            />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {articlesData.map((article) => (
+              <ArticleCard
+                key={article.link}
+                image={article.image_url}
+                title={article.title}
+                summary={article.description}
+                tags={article.keywords.slice(0, 3)} // limit tags for cleaner UI
+                source={article.source_name}
+                url={article.link}
+              />
+            ))}
+
+            {articlesData.length === 0 && (
+              <div className="text-center text-muted-foreground py-12">
+                No articles match your search.
+              </div>
+            )}
           </div>
         </div>
 

@@ -12,11 +12,11 @@ interface ArticleCardProps {
 
 export const ArticleCard: React.FC<ArticleCardProps> = ({ image, title, summary, tags, source, url }) => (
   <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer h-[420px] flex flex-col">
+    <Card className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col">
       <CardHeader className="p-0">
         <img src={image} alt={title} className="w-full h-40 object-cover rounded-t" />
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
+      <CardContent className="flex-1 flex flex-col ">
         <div className="font-bold text-lg mb-1">{title}</div>
         <div className="text-sm text-muted-foreground mb-2 overflow-hidden" style={{display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical'}}>
           {summary}

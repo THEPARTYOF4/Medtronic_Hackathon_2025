@@ -22,8 +22,7 @@ export function Home() {
   <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v)} className="w-full">
         <div className="relative mb-8 mt-5">
           <h1 className="absolute left-0 top-1/2 transform -translate-y-1/2 text-2xl font-bold tracking-tight">
-            MedAssist
-            <span className="text-primary ml-1">Pro</span>
+            Medphonics
           </h1>
 
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
